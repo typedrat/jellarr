@@ -50,7 +50,7 @@ export function createJellyfinClient(
         "/System/Configuration",
       );
 
-      if (res.error) {
+      if (!res.response.ok) {
         throw new Error(
           `GET /System/Configuration failed: ${res.response.status.toString()}`,
         );
@@ -70,7 +70,7 @@ export function createJellyfinClient(
         },
       );
 
-      if (res.error) {
+      if (!res.response.ok) {
         throw new Error(
           `POST /System/Configuration failed: ${res.response.status.toString()}`,
         );
@@ -85,7 +85,7 @@ export function createJellyfinClient(
         },
       );
 
-      if (res.error) {
+      if (!res.response.ok) {
         throw new Error(
           `GET /System/Configuration/encoding failed: ${res.response.status.toString()}`,
         );
@@ -106,7 +106,7 @@ export function createJellyfinClient(
         },
       );
 
-      if (res.error) {
+      if (!res.response.ok) {
         throw new Error(
           `POST /System/Configuration/encoding failed: ${res.response.status.toString()}`,
         );
@@ -118,7 +118,7 @@ export function createJellyfinClient(
         "/Library/VirtualFolders",
       );
 
-      if (res.error) {
+      if (!res.response.ok) {
         throw new Error(
           `GET /Library/VirtualFolders failed: ${res.response.status.toString()}`,
         );
@@ -147,7 +147,7 @@ export function createJellyfinClient(
         },
       );
 
-      if (res.error) {
+      if (!res.response.ok) {
         throw new Error(
           `POST /Library/VirtualFolders failed: ${res.response.status.toString()}`,
         );
@@ -166,7 +166,7 @@ export function createJellyfinClient(
         },
       );
 
-      if (res.error) {
+      if (!res.response.ok) {
         throw new Error(
           `GET /System/Configuration/Branding failed: ${res.response.status.toString()}`,
         );
@@ -185,7 +185,7 @@ export function createJellyfinClient(
         },
       );
 
-      if (res.error) {
+      if (!res.response.ok) {
         throw new Error(
           `POST /System/Configuration/Branding failed: ${res.response.status.toString()}`,
         );
@@ -195,7 +195,7 @@ export function createJellyfinClient(
     async getUsers(): Promise<UserDtoSchema[]> {
       const res: GetUsersResponse = await client.GET("/Users");
 
-      if (res.error) {
+      if (!res.response.ok) {
         throw new Error(`GET /Users failed: ${res.response.status.toString()}`);
       }
 
@@ -207,7 +207,7 @@ export function createJellyfinClient(
         body,
       });
 
-      if (res.error) {
+      if (!res.response.ok) {
         throw new Error(
           `POST /Users/New failed: ${res.response.status.toString()}`,
         );
@@ -227,7 +227,7 @@ export function createJellyfinClient(
         },
       );
 
-      if (res.error) {
+      if (!res.response.ok) {
         throw new Error(
           `POST /Users/{userId}/Policy failed: ${res.response.status.toString()}`,
         );
@@ -238,7 +238,7 @@ export function createJellyfinClient(
       const res: PostStartupCompleteResponse =
         await client.POST("/Startup/Complete");
 
-      if (res.error) {
+      if (!res.response.ok) {
         throw new Error(
           `POST /Startup/Complete failed: ${res.response.status.toString()}`,
         );
@@ -247,7 +247,7 @@ export function createJellyfinClient(
 
     async getPlugins(): Promise<PluginInfoSchema[]> {
       const res: GetPluginsResponse = await client.GET("/Plugins");
-      if (res.error) {
+      if (!res.response.ok) {
         throw new Error(
           `GET /Plugins failed: ${res.response.status.toString()}`,
         );
@@ -262,7 +262,7 @@ export function createJellyfinClient(
           params: { path: { name } },
         },
       );
-      if (res.error) {
+      if (!res.response.ok) {
         throw new Error(
           `POST /Packages/Installed/${name} failed: ${res.response.status.toString()}`,
         );
@@ -278,7 +278,7 @@ export function createJellyfinClient(
           params: { path: { pluginId } },
         },
       );
-      if (res.error) {
+      if (!res.response.ok) {
         throw new Error(
           `GET /Plugins/${pluginId}/Configuration failed: ${res.response.status.toString()}`,
         );
@@ -297,7 +297,7 @@ export function createJellyfinClient(
           body,
         } as unknown as { params: { path: { pluginId: string } } },
       );
-      if (res.error) {
+      if (!res.response.ok) {
         throw new Error(
           `POST /Plugins/${pluginId}/Configuration failed: ${res.response.status.toString()}`,
         );

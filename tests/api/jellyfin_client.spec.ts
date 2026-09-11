@@ -87,10 +87,8 @@ describe("api/jf System façade", () => {
     const req: Request = getLastRequest();
     expect(req.method).toBe("GET");
     expect(req.url).toMatch(/\/System\/Configuration$/);
-    expect(req.headers.get("X-Emby-Token")).toBe(apiKey);
-    expect(req.headers.get("X-Emby-Authorization")).toContain(
-      'MediaBrowser Client="jellarr"',
-    );
+    expect(req.headers.get("Authorization")).toContain(`Token="${apiKey}"`);
+    expect(req.headers.get("Authorization")).toContain('Client="jellarr"');
   });
 
   it("when POST /System/Configuration succeeds with JSON then it sends JSON body and resolves", async (): Promise<void> => {
@@ -109,7 +107,7 @@ describe("api/jf System façade", () => {
     expect(req.method).toBe("POST");
     expect(req.url).toMatch(/\/System\/Configuration$/);
     expect(req.headers.get("content-type")).toBe("application/json");
-    expect(req.headers.get("X-Emby-Token")).toBe(apiKey);
+    expect(req.headers.get("Authorization")).toContain(`Token="${apiKey}"`);
 
     const bodyText: string = await req.text();
     expect(bodyText).toContain("EnableMetrics");
@@ -147,6 +145,26 @@ describe("api/jf System façade", () => {
     // Assert
     await expect(jellyfinClient.getSystemConfiguration()).rejects.toThrow(
       /GET \/System\/Configuration failed/i,
+    );
+  });
+
+  it("when GET /System/Configuration returns 401 with an empty body then it throws", async (): Promise<void> => {
+    // Arrange
+    fetchMock = vi
+      .spyOn(global, "fetch")
+      .mockResolvedValue(
+        new Response(null, { status: 401, headers: { "content-length": "0" } }),
+      );
+
+    // Act
+    const jellyfinClient: JellyfinClient = createJellyfinClient(
+      baseUrl,
+      apiKey,
+    );
+
+    // Assert
+    await expect(jellyfinClient.getSystemConfiguration()).rejects.toThrow(
+      /GET \/System\/Configuration failed: 401/,
     );
   });
 
@@ -214,7 +232,7 @@ describe("api/jf Library façade", () => {
     const req: Request = getLastRequest();
     expect(req.method).toBe("GET");
     expect(req.url).toMatch(/\/Library\/VirtualFolders$/);
-    expect(req.headers.get("X-Emby-Token")).toBe(apiKey);
+    expect(req.headers.get("Authorization")).toContain(`Token="${apiKey}"`);
   });
 
   it("when GET /Library/VirtualFolders returns empty array then it returns empty array", async (): Promise<void> => {
@@ -276,7 +294,7 @@ describe("api/jf Library façade", () => {
     expect(req.url).toContain("collectionType=movies");
     expect(req.url).toContain("refreshLibrary=true");
     expect(req.headers.get("content-type")).toBe("application/json");
-    expect(req.headers.get("X-Emby-Token")).toBe(apiKey);
+    expect(req.headers.get("Authorization")).toContain(`Token="${apiKey}"`);
 
     const bodyText: string = await req.text();
     expect(bodyText).toContain("LibraryOptions");
@@ -340,7 +358,7 @@ describe("api/jf Encoding façade", () => {
     const req: Request = getLastRequest();
     expect(req.method).toBe("GET");
     expect(req.url).toMatch(/\/System\/Configuration\/encoding$/);
-    expect(req.headers.get("X-Emby-Token")).toBe(apiKey);
+    expect(req.headers.get("Authorization")).toContain(`Token="${apiKey}"`);
   });
 
   it("when POST /System/Configuration/Encoding succeeds then it sends JSON body and resolves", async (): Promise<void> => {
@@ -361,7 +379,7 @@ describe("api/jf Encoding façade", () => {
     expect(req.method).toBe("POST");
     expect(req.url).toMatch(/\/System\/Configuration\/encoding$/);
     expect(req.headers.get("content-type")).toBe("application/json");
-    expect(req.headers.get("X-Emby-Token")).toBe(apiKey);
+    expect(req.headers.get("Authorization")).toContain(`Token="${apiKey}"`);
 
     const bodyText: string = await req.text();
     expect(bodyText).toContain("EnableHardwareEncoding");
@@ -437,7 +455,7 @@ describe("api/jf Branding façade", () => {
     const req: Request = getLastRequest();
     expect(req.method).toBe("GET");
     expect(req.url).toMatch(/\/System\/Configuration\/Branding$/);
-    expect(req.headers.get("X-Emby-Token")).toBe(apiKey);
+    expect(req.headers.get("Authorization")).toContain(`Token="${apiKey}"`);
   });
 
   it("when POST /System/Configuration/Branding succeeds then it sends JSON body and resolves", async (): Promise<void> => {
@@ -459,7 +477,7 @@ describe("api/jf Branding façade", () => {
     expect(req.method).toBe("POST");
     expect(req.url).toMatch(/\/System\/Configuration\/Branding$/);
     expect(req.headers.get("content-type")).toBe("application/json");
-    expect(req.headers.get("X-Emby-Token")).toBe(apiKey);
+    expect(req.headers.get("Authorization")).toContain(`Token="${apiKey}"`);
 
     const bodyText: string = await req.text();
     expect(bodyText).toContain("LoginDisclaimer");
@@ -547,7 +565,7 @@ describe("api/jf Users façade", () => {
     const req: Request = getLastRequest();
     expect(req.method).toBe("GET");
     expect(req.url).toMatch(/\/Users$/);
-    expect(req.headers.get("X-Emby-Token")).toBe(apiKey);
+    expect(req.headers.get("Authorization")).toContain(`Token="${apiKey}"`);
   });
 
   it("when GET /Users returns empty array then it returns empty array", async (): Promise<void> => {
@@ -591,7 +609,7 @@ describe("api/jf Users façade", () => {
     expect(req.method).toBe("POST");
     expect(req.url).toMatch(/\/Users\/New$/);
     expect(req.headers.get("content-type")).toBe("application/json");
-    expect(req.headers.get("X-Emby-Token")).toBe(apiKey);
+    expect(req.headers.get("Authorization")).toContain(`Token="${apiKey}"`);
 
     const bodyText: string = await req.text();
     expect(bodyText).toContain("newuser");
@@ -658,7 +676,7 @@ describe("api/jf Users façade", () => {
     expect(req.method).toBe("POST");
     expect(req.url).toMatch(/\/Users\/user-id-123\/Policy/);
     expect(req.headers.get("content-type")).toBe("application/json");
-    expect(req.headers.get("X-Emby-Token")).toBe(apiKey);
+    expect(req.headers.get("Authorization")).toContain(`Token="${apiKey}"`);
 
     const bodyText: string = await req.text();
     expect(bodyText).toContain("IsAdministrator");
@@ -712,7 +730,7 @@ describe("api/jf Startup façade", () => {
     const req: Request = getLastRequest();
     expect(req.method).toBe("POST");
     expect(req.url).toMatch(/\/Startup\/Complete$/);
-    expect(req.headers.get("X-Emby-Token")).toBe(apiKey);
+    expect(req.headers.get("Authorization")).toContain(`Token="${apiKey}"`);
   });
 
   it("when POST /Startup/Complete fails then it throws an error with status", async (): Promise<void> => {
@@ -778,7 +796,7 @@ describe("api/jf Plugins façade", () => {
     const req: Request = getLastRequest();
     expect(req.method).toBe("GET");
     expect(req.url).toMatch(/\/Plugins$/);
-    expect(req.headers.get("X-Emby-Token")).toBe(apiKey);
+    expect(req.headers.get("Authorization")).toContain(`Token="${apiKey}"`);
   });
 
   it("when GET /Plugins returns empty array then it returns empty array", async (): Promise<void> => {
@@ -830,7 +848,7 @@ describe("api/jf Plugins façade", () => {
     const req: Request = getLastRequest();
     expect(req.method).toBe("POST");
     expect(req.url).toMatch(/\/Packages\/Installed\/Trakt$/);
-    expect(req.headers.get("X-Emby-Token")).toBe(apiKey);
+    expect(req.headers.get("Authorization")).toContain(`Token="${apiKey}"`);
   });
 
   it("when POST /Packages/Installed/{name} with spaces succeeds then it URL-encodes the name", async (): Promise<void> => {
@@ -889,7 +907,7 @@ describe("api/jf Plugins façade", () => {
     const req: Request = getLastRequest();
     expect(req.method).toBe("GET");
     expect(req.url).toMatch(/\/Plugins\/plugin-id-123\/Configuration$/);
-    expect(req.headers.get("X-Emby-Token")).toBe(apiKey);
+    expect(req.headers.get("Authorization")).toContain(`Token="${apiKey}"`);
   });
 
   it("when GET /Plugins/{pluginId}/Configuration fails then it throws an error with status", async (): Promise<void> => {
@@ -929,7 +947,7 @@ describe("api/jf Plugins façade", () => {
     expect(req.method).toBe("POST");
     expect(req.url).toMatch(/\/Plugins\/plugin-id-123\/Configuration$/);
     expect(req.headers.get("content-type")).toBe("application/json");
-    expect(req.headers.get("X-Emby-Token")).toBe(apiKey);
+    expect(req.headers.get("Authorization")).toContain(`Token="${apiKey}"`);
 
     const bodyText: string = await req.text();
     expect(bodyText).toContain("TraktUsers");
