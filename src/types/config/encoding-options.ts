@@ -35,6 +35,36 @@ export const EncodingOptionsConfigType: z.ZodObject<{
   enableDecodingColorDepth12HevcRext: z.ZodOptional<z.ZodBoolean>;
   allowHevcEncoding: z.ZodOptional<z.ZodBoolean>;
   allowAv1Encoding: z.ZodOptional<z.ZodBoolean>;
+  enableTonemapping: z.ZodOptional<z.ZodBoolean>;
+  enableVppTonemapping: z.ZodOptional<z.ZodBoolean>;
+  tonemappingAlgorithm: z.ZodOptional<
+    z.ZodEnum<{
+      none: "none";
+      clip: "clip";
+      linear: "linear";
+      gamma: "gamma";
+      reinhard: "reinhard";
+      hable: "hable";
+      mobius: "mobius";
+      bt2390: "bt2390";
+    }>
+  >;
+  tonemappingMode: z.ZodOptional<
+    z.ZodEnum<{
+      auto: "auto";
+      max: "max";
+      rgb: "rgb";
+      lum: "lum";
+      itp: "itp";
+    }>
+  >;
+  tonemappingRange: z.ZodOptional<
+    z.ZodEnum<{
+      auto: "auto";
+      tv: "tv";
+      pc: "pc";
+    }>
+  >;
 }> = z
   .object({
     enableHardwareEncoding: z.boolean().optional(),
@@ -61,6 +91,22 @@ export const EncodingOptionsConfigType: z.ZodObject<{
     enableDecodingColorDepth12HevcRext: z.boolean().optional(),
     allowHevcEncoding: z.boolean().optional(),
     allowAv1Encoding: z.boolean().optional(),
+    enableTonemapping: z.boolean().optional(),
+    enableVppTonemapping: z.boolean().optional(),
+    tonemappingAlgorithm: z
+      .enum([
+        "none",
+        "clip",
+        "linear",
+        "gamma",
+        "reinhard",
+        "hable",
+        "mobius",
+        "bt2390",
+      ])
+      .optional(),
+    tonemappingMode: z.enum(["auto", "max", "rgb", "lum", "itp"]).optional(),
+    tonemappingRange: z.enum(["auto", "tv", "pc"]).optional(),
   })
   .strict();
 

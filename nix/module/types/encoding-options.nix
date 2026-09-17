@@ -77,6 +77,50 @@
         default = null;
         description = "Allow AV1 encoding.";
       };
+      enableTonemapping = mkOption {
+        type = nullOr types.bool;
+        default = null;
+        description = "Enable tone mapping (HDR to SDR conversion).";
+      };
+      enableVppTonemapping = mkOption {
+        type = nullOr types.bool;
+        default = null;
+        description = "Use the hardware video post-processing (VPP) tone mapper, e.g. on AMD.";
+      };
+      tonemappingAlgorithm = mkOption {
+        type = nullOr (types.enum [
+          "none"
+          "clip"
+          "linear"
+          "gamma"
+          "reinhard"
+          "hable"
+          "mobius"
+          "bt2390"
+        ]);
+        default = null;
+        description = "Tone mapping algorithm.";
+      };
+      tonemappingMode = mkOption {
+        type = nullOr (types.enum [
+          "auto"
+          "max"
+          "rgb"
+          "lum"
+          "itp"
+        ]);
+        default = null;
+        description = "Tone mapping mode.";
+      };
+      tonemappingRange = mkOption {
+        type = nullOr (types.enum [
+          "auto"
+          "tv"
+          "pc"
+        ]);
+        default = null;
+        description = "Tone mapping output range.";
+      };
     };
   };
 
@@ -92,7 +136,12 @@
     // optionalAttrs (cfg.enableDecodingColorDepth10HevcRext != null) {inherit (cfg) enableDecodingColorDepth10HevcRext;}
     // optionalAttrs (cfg.enableDecodingColorDepth12HevcRext != null) {inherit (cfg) enableDecodingColorDepth12HevcRext;}
     // optionalAttrs (cfg.allowHevcEncoding != null) {inherit (cfg) allowHevcEncoding;}
-    // optionalAttrs (cfg.allowAv1Encoding != null) {inherit (cfg) allowAv1Encoding;};
+    // optionalAttrs (cfg.allowAv1Encoding != null) {inherit (cfg) allowAv1Encoding;}
+    // optionalAttrs (cfg.enableTonemapping != null) {inherit (cfg) enableTonemapping;}
+    // optionalAttrs (cfg.enableVppTonemapping != null) {inherit (cfg) enableVppTonemapping;}
+    // optionalAttrs (cfg.tonemappingAlgorithm != null) {inherit (cfg) tonemappingAlgorithm;}
+    // optionalAttrs (cfg.tonemappingMode != null) {inherit (cfg) tonemappingMode;}
+    // optionalAttrs (cfg.tonemappingRange != null) {inherit (cfg) tonemappingRange;};
 in {
   inherit encodingOptionsConfigType mkEncodingOptionsConfig;
 }

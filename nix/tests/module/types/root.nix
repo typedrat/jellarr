@@ -37,6 +37,11 @@
     enableDecodingColorDepth12HevcRext = null;
     allowHevcEncoding = null;
     allowAv1Encoding = null;
+    enableTonemapping = null;
+    enableVppTonemapping = null;
+    tonemappingAlgorithm = null;
+    tonemappingMode = null;
+    tonemappingRange = null;
   };
 
   nullLibraryConfig = {virtualFolders = null;};

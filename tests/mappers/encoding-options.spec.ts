@@ -482,7 +482,73 @@ describe("mappers/encoding", () => {
       expect(result).not.toHaveProperty("AllowAv1Encoding");
     });
 
-    it("should map complete encoding config with all 11 fields", () => {
+    it("should map tone mapping fields", () => {
+      // Arrange
+      const testCases: Array<{
+        config: EncodingOptionsConfig;
+        expected: Partial<EncodingOptionsSchema>;
+      }> = [
+        {
+          config: { enableTonemapping: true },
+          expected: { EnableTonemapping: true },
+        },
+        {
+          config: { enableTonemapping: false },
+          expected: { EnableTonemapping: false },
+        },
+        {
+          config: { enableVppTonemapping: true },
+          expected: { EnableVppTonemapping: true },
+        },
+        {
+          config: { tonemappingAlgorithm: "bt2390" },
+          expected: { TonemappingAlgorithm: "bt2390" },
+        },
+        {
+          config: { tonemappingMode: "lum" },
+          expected: { TonemappingMode: "lum" },
+        },
+        {
+          config: { tonemappingRange: "tv" },
+          expected: { TonemappingRange: "tv" },
+        },
+      ];
+
+      testCases.forEach(
+        ({
+          config,
+          expected,
+        }: {
+          config: EncodingOptionsConfig;
+          expected: Partial<EncodingOptionsSchema>;
+        }) => {
+          // Act
+          const result: Partial<EncodingOptionsSchema> =
+            mapEncodingOptionsConfigToSchema(config);
+
+          // Assert
+          expect(result).toEqual(expected);
+        },
+      );
+    });
+
+    it("should not include tone mapping fields when undefined", () => {
+      // Arrange
+      const config: EncodingOptionsConfig = {};
+
+      // Act
+      const result: Partial<EncodingOptionsSchema> =
+        mapEncodingOptionsConfigToSchema(config);
+
+      // Assert
+      expect(result).not.toHaveProperty("EnableTonemapping");
+      expect(result).not.toHaveProperty("EnableVppTonemapping");
+      expect(result).not.toHaveProperty("TonemappingAlgorithm");
+      expect(result).not.toHaveProperty("TonemappingMode");
+      expect(result).not.toHaveProperty("TonemappingRange");
+    });
+
+    it("should map complete encoding config with all 16 fields", () => {
       // Arrange
       const config: EncodingOptionsConfig = {
         enableHardwareEncoding: true,
@@ -496,6 +562,11 @@ describe("mappers/encoding", () => {
         enableDecodingColorDepth12HevcRext: false,
         allowHevcEncoding: false,
         allowAv1Encoding: true,
+        enableTonemapping: true,
+        enableVppTonemapping: true,
+        tonemappingAlgorithm: "bt2390",
+        tonemappingMode: "lum",
+        tonemappingRange: "tv",
       };
 
       // Act
@@ -515,6 +586,11 @@ describe("mappers/encoding", () => {
         EnableDecodingColorDepth12HevcRext: false,
         AllowHevcEncoding: false,
         AllowAv1Encoding: true,
+        EnableTonemapping: true,
+        EnableVppTonemapping: true,
+        TonemappingAlgorithm: "bt2390",
+        TonemappingMode: "lum",
+        TonemappingRange: "tv",
       });
     });
   });

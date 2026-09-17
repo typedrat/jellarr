@@ -18,6 +18,11 @@
     enableDecodingColorDepth12HevcRext = null;
     allowHevcEncoding = null;
     allowAv1Encoding = null;
+    enableTonemapping = null;
+    enableVppTonemapping = null;
+    tonemappingAlgorithm = null;
+    tonemappingMode = null;
+    tonemappingRange = null;
   };
 in [
   (assertEq "empty config" (mkEncodingOptionsConfig nullConfig) {})
@@ -177,6 +182,26 @@ in [
     allowAv1Encoding = false;
   })
 
+  (assertEq "enableTonemapping true" (mkEncodingOptionsConfig (nullConfig // {enableTonemapping = true;})) {
+    enableTonemapping = true;
+  })
+
+  (assertEq "enableVppTonemapping true" (mkEncodingOptionsConfig (nullConfig // {enableVppTonemapping = true;})) {
+    enableVppTonemapping = true;
+  })
+
+  (assertEq "tonemappingAlgorithm bt2390" (mkEncodingOptionsConfig (nullConfig // {tonemappingAlgorithm = "bt2390";})) {
+    tonemappingAlgorithm = "bt2390";
+  })
+
+  (assertEq "tonemappingMode lum" (mkEncodingOptionsConfig (nullConfig // {tonemappingMode = "lum";})) {
+    tonemappingMode = "lum";
+  })
+
+  (assertEq "tonemappingRange tv" (mkEncodingOptionsConfig (nullConfig // {tonemappingRange = "tv";})) {
+    tonemappingRange = "tv";
+  })
+
   (assertEq "complete config all fields" (mkEncodingOptionsConfig {
       enableHardwareEncoding = true;
       hardwareAccelerationType = "vaapi";
@@ -189,6 +214,11 @@ in [
       enableDecodingColorDepth12HevcRext = false;
       allowHevcEncoding = false;
       allowAv1Encoding = false;
+      enableTonemapping = true;
+      enableVppTonemapping = true;
+      tonemappingAlgorithm = "bt2390";
+      tonemappingMode = "lum";
+      tonemappingRange = "tv";
     }) {
       enableHardwareEncoding = true;
       hardwareAccelerationType = "vaapi";
@@ -201,5 +231,10 @@ in [
       enableDecodingColorDepth12HevcRext = false;
       allowHevcEncoding = false;
       allowAv1Encoding = false;
+      enableTonemapping = true;
+      enableVppTonemapping = true;
+      tonemappingAlgorithm = "bt2390";
+      tonemappingMode = "lum";
+      tonemappingRange = "tv";
     })
 ]
