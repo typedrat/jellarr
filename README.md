@@ -349,19 +349,34 @@ plugins:
     - name: "Fanart"
       configuration:
           EnableImages: true
+
+    # Hold a plugin at a specific version
+    - name: "Shoko"
+      version: "6.0.5.4012"
 ```
 
 **How it works:**
 
 - Plugins are installed from repositories configured in
   `system.pluginRepositories`
-- Plugin names must match exactly (case-sensitive)
+- Plugin names must match the catalog name exactly (case-sensitive). Installed
+  plugins are matched by the catalog entry's GUID, so a plugin that reports a
+  different name once installed (e.g. "SSO Authentication" installs as
+  "SSO-Auth") is still recognized
+- Without `version`, each plugin is kept at the newest version its repositories
+  offer for the running Jellyfin version, so changing a repository URL or
+  upgrading Jellyfin upgrades the plugin on the next run
+- With `version`, that version is installed and the plugin is held there.
+  Jellyfin always loads the newest installed copy of a plugin, so a pin below
+  the installed version is reported but not applied; uninstall the plugin to
+  downgrade
+- Jellyfin loads installed or upgraded plugins only after a restart. Until then
+  a newly installed plugin has no configuration to update, so its
+  `configuration` is applied on the first run after the restart
 - The `configuration` field accepts arbitrary key-value pairs specific to each
   plugin
 - Only specified configuration fields are updated; unspecified fields are
   preserved
-- Plugin configurations are applied after installation, allowing newly installed
-  plugins to be configured in the same run
 
 **Finding plugin configuration keys:**
 

@@ -26,8 +26,11 @@ import type {
   PostNewUserResponse,
   PostUserPolicyResponse,
   PostStartupCompleteResponse,
+  GetSystemInfoResponse,
   GetPluginsResponse,
+  GetPackagesResponse,
   PostInstallPackageResponse,
+  InstallPackageOptions,
   GetPluginConfigurationResponse,
   PostPluginConfigurationResponse,
 } from "./jellyfin.types";
@@ -36,6 +39,7 @@ import type { paths } from "../../generated/schema";
 import type { Client } from "openapi-fetch";
 import {
   type PluginInfoSchema,
+  type PackageInfoSchema,
   type BasePluginConfigurationSchema,
 } from "../types/schema/plugins";
 
@@ -46,6 +50,20 @@ export function createJellyfinClient(
   const client: Client<paths> = makeClient(baseUrl, apiKey);
 
   return {
+    async getServerVersion(): Promise<string> {
+      const res: GetSystemInfoResponse = await client.GET("/System/Info");
+      if (!res.response.ok) {
+        throw new Error(
+          `GET /System/Info failed: ${res.response.status.toString()}`,
+        );
+      }
+      const version: string | null | undefined = res.data?.Version;
+      if (!version) {
+        throw new Error("GET /System/Info returned no server version");
+      }
+      return version;
+    },
+
     async getSystemConfiguration(): Promise<ServerConfigurationSchema> {
       const res: GetSystemConfigurationResponse = await client.GET(
         "/System/Configuration",
@@ -290,11 +308,24 @@ export function createJellyfinClient(
       return res.data as PluginInfoSchema[];
     },
 
-    async installPackage(name: string): Promise<void> {
+    async getPackages(): Promise<PackageInfoSchema[]> {
+      const res: GetPackagesResponse = await client.GET("/Packages");
+      if (!res.response.ok) {
+        throw new Error(
+          `GET /Packages failed: ${res.response.status.toString()}`,
+        );
+      }
+      return res.data as PackageInfoSchema[];
+    },
+
+    async installPackage(
+      name: string,
+      options?: InstallPackageOptions,
+    ): Promise<void> {
       const res: PostInstallPackageResponse = await client.POST(
         "/Packages/Installed/{name}",
         {
-          params: { path: { name } },
+          params: { path: { name }, query: options },
         },
       );
       if (!res.response.ok) {

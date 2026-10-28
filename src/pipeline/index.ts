@@ -34,16 +34,18 @@ import { RootConfigType, type RootConfig } from "../types/config/root";
 import { type ZodSafeParseResult, type z } from "zod";
 import {
   type PluginInfoSchema,
+  type PackageInfoSchema,
   type BasePluginConfigurationSchema,
 } from "../types/schema/plugins";
 import {
-  calculatePluginsToInstall,
+  calculatePluginInstalls,
   installPlugins,
+  resolveInstalledPluginNames,
   calculatePluginConfigurationsDiff,
   applyPluginConfigurations,
   getPluginConfigurationSchemaByName,
+  type PluginInstall,
 } from "../apply/plugins";
-import type { PluginConfig } from "../types/config/plugins";
 
 export async function runPipeline(path: string): Promise<void> {
   const raw: string = await fs.readFile(path, "utf8");
@@ -187,14 +189,20 @@ export async function runPipeline(path: string): Promise<void> {
   if (cfg.plugins) {
     let installedPlugins: PluginInfoSchema[] =
       await jellyfinClient.getPlugins();
+    const catalog: PackageInfoSchema[] = await jellyfinClient.getPackages();
 
-    const pluginsToInstall: PluginConfig[] | undefined =
-      calculatePluginsToInstall(installedPlugins, cfg.plugins);
+    const pluginInstalls: PluginInstall[] | undefined =
+      calculatePluginInstalls(
+        installedPlugins,
+        catalog,
+        cfg.plugins,
+        await jellyfinClient.getServerVersion(),
+      );
 
-    if (pluginsToInstall) {
+    if (pluginInstalls) {
       console.log("→ installing plugins");
-      await installPlugins(jellyfinClient, pluginsToInstall);
-      console.log("✓ installed plugins");
+      await installPlugins(jellyfinClient, pluginInstalls);
+      console.log("✓ installed plugins; restart Jellyfin to load them");
       installedPlugins = await jellyfinClient.getPlugins();
     } else {
       console.log("✓ plugins already up to date");
@@ -207,7 +215,7 @@ export async function runPipeline(path: string): Promise<void> {
         jellyfinClient,
         installedPlugins,
       ),
-      cfg.plugins,
+      resolveInstalledPluginNames(installedPlugins, catalog, cfg.plugins),
     );
 
     if (pluginConfigurationsToUpdate) {

@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import {
-  calculatePluginsToInstall,
+  calculatePluginInstalls,
+  compareVersions,
+  resolveInstalledPluginNames,
   installPlugins,
+  type PluginInstall,
   getPluginConfigurationSchemaByName,
   calculatePluginConfigurationDiff,
   calculatePluginConfigurationsDiff,
@@ -9,12 +12,12 @@ import {
 } from "../../src/apply/plugins";
 import type { JellyfinClient } from "../../src/api/jellyfin.types";
 import type {
-  PluginConfig,
   PluginConfigList,
   PluginConfigurationConfig,
 } from "../../src/types/config/plugins";
 import type {
   PluginInfoSchema,
+  PackageInfoSchema,
   BasePluginConfigurationSchema,
   PluginConfigurationSchema,
 } from "../../src/types/schema/plugins";
@@ -27,183 +30,216 @@ vi.mock("../../src/lib/logger", () => ({
   },
 }));
 
-describe("calculatePluginsToInstall", () => {
-  const installedPlugins: PluginInfoSchema[] = [
-    {
-      Name: "Trakt",
-      Version: "26.0.0",
-      Id: "plugin-1-id",
-      Status: "Active",
-    } as PluginInfoSchema,
-    {
-      Name: "Playback Reporting",
-      Version: "10.0.0",
-      Id: "plugin-2-id",
-      Status: "Active",
-    } as PluginInfoSchema,
-  ];
+const SSO_GUID: string = "505ce9d1-d916-42fa-86ca-673ef241d7df";
+const LDAP_GUID: string = "958aad66-3784-4d2a-b89a-a7b6fab6e25c";
 
+function catalogEntry(
+  name: string,
+  guid: string,
+  versions: Array<{ version: string; targetAbi?: string }>,
+): PackageInfoSchema {
+  return {
+    name,
+    guid,
+    versions: versions.map((v: { version: string; targetAbi?: string }) => ({
+      ...v,
+      repositoryUrl: `https://example.invalid/${name}/manifest.json`,
+    })),
+  } as PackageInfoSchema;
+}
+
+const catalog: PackageInfoSchema[] = [
+  catalogEntry("SSO Authentication", SSO_GUID, [
+    { version: "5.1.1", targetAbi: "12.0.0.0" },
+    { version: "5.1.0", targetAbi: "12.0.0.0" },
+    { version: "4.0.0.4", targetAbi: "10.11.0.0" },
+    { version: "6.0.0", targetAbi: "13.0.0.0" },
+  ]),
+  catalogEntry("LDAP Authentication", LDAP_GUID, [
+    { version: "24.0.0.0", targetAbi: "12.0.0.0" },
+  ]),
+];
+
+function installedPlugin(
+  name: string,
+  guid: string,
+  version: string,
+): PluginInfoSchema {
+  return {
+    Name: name,
+    Id: guid.replace(/-/g, ""),
+    Version: version,
+    Status: "Active",
+  } as PluginInfoSchema;
+}
+
+describe("compareVersions", () => {
+  it("should treat missing components as zero", () => {
+    expect(compareVersions("5.1.1", "5.1.1.0")).toBe(0);
+  });
+
+  it("should compare components numerically", () => {
+    expect(compareVersions("10.0.0", "9.9.9")).toBe(1);
+    expect(compareVersions("4.0.0.4", "5.1.1")).toBe(-1);
+  });
+});
+
+describe("calculatePluginInstalls", () => {
   it("should return undefined when no plugins desired", () => {
-    // Arrange
-    const config: PluginConfigList = [];
-
-    // Act
-    const result: PluginConfig[] | undefined = calculatePluginsToInstall(
-      installedPlugins,
-      config,
-    );
-
-    // Assert
-    expect(result).toBeUndefined();
+    expect(calculatePluginInstalls([], catalog, [], "12.2.0")).toBeUndefined();
   });
 
-  it("should return undefined when all desired plugins already installed", () => {
-    // Arrange
-    const config: PluginConfigList = [
-      { name: "Trakt" },
-      { name: "Playback Reporting" },
-    ];
-
+  it("should install a missing plugin at its newest compatible version", () => {
     // Act
-    const result: PluginConfig[] | undefined = calculatePluginsToInstall(
-      installedPlugins,
-      config,
-    );
-
-    // Assert
-    expect(result).toBeUndefined();
-  });
-
-  it("should return plugins to install when new plugins desired", () => {
-    // Arrange
-    const config: PluginConfigList = [{ name: "Trakt" }, { name: "Fanart" }];
-
-    // Act
-    const result: PluginConfig[] | undefined = calculatePluginsToInstall(
-      installedPlugins,
-      config,
-    );
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result).toHaveLength(1);
-    expect(result?.[0]).toEqual({ name: "Fanart" });
-  });
-
-  it("should return multiple plugins when multiple new plugins desired", () => {
-    // Arrange
-    const config: PluginConfigList = [
-      { name: "Fanart" },
-      { name: "TMDb Box Sets" },
-    ];
-
-    // Act
-    const result: PluginConfig[] | undefined = calculatePluginsToInstall(
-      installedPlugins,
-      config,
-    );
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result).toHaveLength(2);
-    expect(result?.[0]).toEqual({ name: "Fanart" });
-    expect(result?.[1]).toEqual({ name: "TMDb Box Sets" });
-  });
-
-  it("should handle mixed existing and new plugins", () => {
-    // Arrange
-    const config: PluginConfigList = [
-      { name: "Trakt" },
-      { name: "Fanart" },
-      { name: "Playback Reporting" },
-      { name: "TMDb Box Sets" },
-    ];
-
-    // Act
-    const result: PluginConfig[] | undefined = calculatePluginsToInstall(
-      installedPlugins,
-      config,
-    );
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result).toHaveLength(2);
-    expect(result?.[0]).toEqual({ name: "Fanart" });
-    expect(result?.[1]).toEqual({ name: "TMDb Box Sets" });
-  });
-
-  it("should handle empty installed plugins list", () => {
-    // Arrange
-    const config: PluginConfigList = [{ name: "Trakt" }];
-
-    // Act
-    const result: PluginConfig[] | undefined = calculatePluginsToInstall(
+    const result: PluginInstall[] | undefined = calculatePluginInstalls(
       [],
-      config,
+      catalog,
+      [{ name: "SSO Authentication" }],
+      "12.2.0",
     );
 
     // Assert
-    expect(result).toBeDefined();
-    expect(result).toHaveLength(1);
-    expect(result?.[0]).toEqual({ name: "Trakt" });
-  });
-
-  it("should handle order-independent comparison", () => {
-    // Arrange
-    const config: PluginConfigList = [
-      { name: "Playback Reporting" },
-      { name: "Trakt" },
-    ];
-
-    // Act
-    const result: PluginConfig[] | undefined = calculatePluginsToInstall(
-      installedPlugins,
-      config,
-    );
-
-    // Assert
-    expect(result).toBeUndefined();
-  });
-
-  it("should handle undefined plugin names in installed plugins", () => {
-    // Arrange
-    const installedWithUndefined: PluginInfoSchema[] = [
+    expect(result).toEqual([
       {
-        Name: undefined,
-        Id: "plugin-1-id",
-      } as PluginInfoSchema,
-      {
-        Name: "Trakt",
-        Id: "plugin-2-id",
-      } as PluginInfoSchema,
-    ];
-
-    const config: PluginConfigList = [{ name: "Trakt" }];
-
-    // Act
-    const result: PluginConfig[] | undefined = calculatePluginsToInstall(
-      installedWithUndefined,
-      config,
-    );
-
-    // Assert
-    expect(result).toBeUndefined();
+        name: "SSO Authentication",
+        guid: SSO_GUID,
+        version: "5.1.1",
+        repositoryUrl:
+          "https://example.invalid/SSO Authentication/manifest.json",
+      },
+    ]);
   });
 
-  it("should be case-sensitive when matching plugin names", () => {
-    // Arrange
-    const config: PluginConfigList = [{ name: "trakt" }];
-
+  it("should upgrade an installed plugin matched by GUID under a different name", () => {
     // Act
-    const result: PluginConfig[] | undefined = calculatePluginsToInstall(
-      installedPlugins,
-      config,
+    const result: PluginInstall[] | undefined = calculatePluginInstalls(
+      [installedPlugin("SSO-Auth", SSO_GUID, "4.0.0.4")],
+      catalog,
+      [{ name: "SSO Authentication" }],
+      "12.2.0",
     );
 
     // Assert
-    expect(result).toBeDefined();
     expect(result).toHaveLength(1);
-    expect(result?.[0]).toEqual({ name: "trakt" });
+    expect(result?.[0]).toMatchObject({
+      version: "5.1.1",
+      installedVersion: "4.0.0.4",
+    });
+  });
+
+  it("should not reinstall a plugin already at the newest compatible version", () => {
+    expect(
+      calculatePluginInstalls(
+        [installedPlugin("LDAP-Auth", LDAP_GUID, "24.0.0.0")],
+        catalog,
+        [{ name: "LDAP Authentication" }],
+        "12.2.0",
+      ),
+    ).toBeUndefined();
+  });
+
+  it("should skip versions built for a newer server", () => {
+    // Act
+    const result: PluginInstall[] | undefined = calculatePluginInstalls(
+      [],
+      catalog,
+      [{ name: "SSO Authentication" }],
+      "10.11.6",
+    );
+
+    // Assert
+    expect(result?.[0]?.version).toBe("4.0.0.4");
+  });
+
+  it("should install a pinned version and hold the plugin there", () => {
+    expect(
+      calculatePluginInstalls(
+        [installedPlugin("SSO-Auth", SSO_GUID, "4.0.0.4")],
+        catalog,
+        [{ name: "SSO Authentication", version: "5.1.0" }],
+        "12.2.0",
+      )?.[0]?.version,
+    ).toBe("5.1.0");
+
+    expect(
+      calculatePluginInstalls(
+        [installedPlugin("SSO-Auth", SSO_GUID, "5.1.0.0")],
+        catalog,
+        [{ name: "SSO Authentication", version: "5.1.0" }],
+        "12.2.0",
+      ),
+    ).toBeUndefined();
+  });
+
+  it("should not try to downgrade below the installed version", () => {
+    expect(
+      calculatePluginInstalls(
+        [installedPlugin("SSO-Auth", SSO_GUID, "5.1.1.0")],
+        catalog,
+        [{ name: "SSO Authentication", version: "5.1.0" }],
+        "12.2.0",
+      ),
+    ).toBeUndefined();
+  });
+
+  it("should compare against the newest of several installed copies", () => {
+    expect(
+      calculatePluginInstalls(
+        [
+          installedPlugin("SSO-Auth", SSO_GUID, "4.0.0.4"),
+          installedPlugin("SSO-Auth", SSO_GUID, "5.1.1.0"),
+        ],
+        catalog,
+        [{ name: "SSO Authentication" }],
+        "12.2.0",
+      ),
+    ).toBeUndefined();
+  });
+
+  it("should throw for a pinned version that does not exist", () => {
+    expect(() =>
+      calculatePluginInstalls(
+        [],
+        catalog,
+        [{ name: "SSO Authentication", version: "9.9.9" }],
+        "12.2.0",
+      ),
+    ).toThrow(/no version 9.9.9/);
+  });
+
+  it("should throw for a missing plugin that is in no repository", () => {
+    expect(() =>
+      calculatePluginInstalls([], catalog, [{ name: "Trakt" }], "12.2.0"),
+    ).toThrow(/not in any configured repository/);
+  });
+
+  it("should leave an installed plugin alone when it is in no repository", () => {
+    expect(
+      calculatePluginInstalls(
+        [installedPlugin("Trakt", "0f8a3c5e-0000-0000-0000-000000000000", "26.0.0")],
+        catalog,
+        [{ name: "Trakt" }],
+        "12.2.0",
+      ),
+    ).toBeUndefined();
+  });
+});
+
+describe("resolveInstalledPluginNames", () => {
+  it("should rename desired plugins to their installed names", () => {
+    expect(
+      resolveInstalledPluginNames(
+        [installedPlugin("SSO-Auth", SSO_GUID, "4.0.0.4")],
+        catalog,
+        [{ name: "SSO Authentication", configuration: { a: 1 } }],
+      ),
+    ).toEqual([{ name: "SSO-Auth", configuration: { a: 1 } }]);
+  });
+
+  it("should keep the desired name when the plugin is not installed", () => {
+    expect(
+      resolveInstalledPluginNames([], catalog, [{ name: "SSO Authentication" }]),
+    ).toEqual([{ name: "SSO Authentication" }]);
   });
 });
 
@@ -213,78 +249,43 @@ describe("installPlugins", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    installPackageSpy = vi.fn();
+    installPackageSpy = vi.fn().mockResolvedValue(undefined);
     mockClient = {
       installPackage: installPackageSpy,
     } as unknown as JellyfinClient;
   });
 
-  it("should do nothing when plugins is undefined", async () => {
-    // Act
+  it("should do nothing when installs is undefined", async () => {
     await installPlugins(mockClient, undefined);
 
-    // Assert
     expect(installPackageSpy).not.toHaveBeenCalled();
   });
 
-  it("should install single plugin", async () => {
+  it("should install each plugin by GUID, version, and repository", async () => {
     // Arrange
-    const pluginsToInstall: PluginConfig[] = [{ name: "Trakt" }];
-    installPackageSpy.mockResolvedValue(undefined);
-
-    // Act
-    await installPlugins(mockClient, pluginsToInstall);
-
-    // Assert
-    expect(installPackageSpy).toHaveBeenCalledTimes(1);
-    expect(installPackageSpy).toHaveBeenCalledWith("Trakt");
-  });
-
-  it("should install multiple plugins", async () => {
-    // Arrange
-    const pluginsToInstall: PluginConfig[] = [
-      { name: "Trakt" },
-      { name: "Fanart" },
-      { name: "Playback Reporting" },
+    const installs: PluginInstall[] = [
+      {
+        name: "SSO Authentication",
+        guid: SSO_GUID,
+        version: "5.1.1",
+        repositoryUrl: "https://example.invalid/sso.json",
+      },
+      { name: "LDAP Authentication", guid: LDAP_GUID, version: "24.0.0.0" },
     ];
-    installPackageSpy.mockResolvedValue(undefined);
 
     // Act
-    await installPlugins(mockClient, pluginsToInstall);
+    await installPlugins(mockClient, installs);
 
     // Assert
-    expect(installPackageSpy).toHaveBeenCalledTimes(3);
-    expect(installPackageSpy).toHaveBeenNthCalledWith(1, "Trakt");
-    expect(installPackageSpy).toHaveBeenNthCalledWith(2, "Fanart");
-    expect(installPackageSpy).toHaveBeenNthCalledWith(3, "Playback Reporting");
-  });
-
-  it("should handle empty plugins list", async () => {
-    // Arrange
-    const pluginsToInstall: PluginConfig[] = [];
-
-    // Act
-    await installPlugins(mockClient, pluginsToInstall);
-
-    // Assert
-    expect(installPackageSpy).not.toHaveBeenCalled();
-  });
-
-  it("should install plugins with spaces in name", async () => {
-    // Arrange
-    const pluginsToInstall: PluginConfig[] = [
-      { name: "Playback Reporting" },
-      { name: "TMDb Box Sets" },
-    ];
-    installPackageSpy.mockResolvedValue(undefined);
-
-    // Act
-    await installPlugins(mockClient, pluginsToInstall);
-
-    // Assert
-    expect(installPackageSpy).toHaveBeenCalledTimes(2);
-    expect(installPackageSpy).toHaveBeenNthCalledWith(1, "Playback Reporting");
-    expect(installPackageSpy).toHaveBeenNthCalledWith(2, "TMDb Box Sets");
+    expect(installPackageSpy).toHaveBeenNthCalledWith(1, "SSO Authentication", {
+      assemblyGuid: SSO_GUID,
+      version: "5.1.1",
+      repositoryUrl: "https://example.invalid/sso.json",
+    });
+    expect(installPackageSpy).toHaveBeenNthCalledWith(2, "LDAP Authentication", {
+      assemblyGuid: LDAP_GUID,
+      version: "24.0.0.0",
+    });
   });
 });
 

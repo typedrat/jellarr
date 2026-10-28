@@ -24,6 +24,7 @@ import type {
 } from "../../src/types/schema/users";
 import type {
   PluginInfoSchema,
+  PackageInfoSchema,
   BasePluginConfigurationSchema,
 } from "../../src/types/schema/plugins";
 
@@ -866,6 +867,80 @@ describe("api/jf Plugins façade", () => {
     const req: Request = getLastRequest();
     expect(req.method).toBe("POST");
     expect(req.url).toMatch(/\/Packages\/Installed\/Playback%20Reporting$/);
+  });
+
+  it("when POST /Packages/Installed/{name} has options then it sends them as query parameters", async (): Promise<void> => {
+    // Arrange
+    mockFetchNoContent(204);
+
+    // Act
+    const jellyfinClient: JellyfinClient = createJellyfinClient(
+      baseUrl,
+      apiKey,
+    );
+    await jellyfinClient.installPackage("SSO Authentication", {
+      assemblyGuid: "505ce9d1-d916-42fa-86ca-673ef241d7df",
+      version: "5.1.1",
+      repositoryUrl: "https://example.invalid/manifest.json",
+    });
+
+    // Assert
+    const url: URL = new URL(getLastRequest().url);
+    expect(url.pathname).toBe("/Packages/Installed/SSO%20Authentication");
+    expect(url.searchParams.get("assemblyGuid")).toBe(
+      "505ce9d1-d916-42fa-86ca-673ef241d7df",
+    );
+    expect(url.searchParams.get("version")).toBe("5.1.1");
+    expect(url.searchParams.get("repositoryUrl")).toBe(
+      "https://example.invalid/manifest.json",
+    );
+  });
+
+  it("when GET /Packages returns JSON then it returns the catalog", async (): Promise<void> => {
+    // Arrange
+    mockFetchJson([{ name: "Trakt", guid: "abc", versions: [] }]);
+
+    // Act
+    const jellyfinClient: JellyfinClient = createJellyfinClient(
+      baseUrl,
+      apiKey,
+    );
+    const out: PackageInfoSchema[] = await jellyfinClient.getPackages();
+
+    // Assert
+    expect(out).toEqual([{ name: "Trakt", guid: "abc", versions: [] }]);
+    expect(getLastRequest().url).toMatch(/\/Packages$/);
+  });
+
+  it("when GET /System/Info returns a version then it returns it", async (): Promise<void> => {
+    // Arrange
+    mockFetchJson({ Version: "12.2.0" });
+
+    // Act
+    const jellyfinClient: JellyfinClient = createJellyfinClient(
+      baseUrl,
+      apiKey,
+    );
+
+    // Assert
+    await expect(jellyfinClient.getServerVersion()).resolves.toBe("12.2.0");
+    expect(getLastRequest().url).toMatch(/\/System\/Info$/);
+  });
+
+  it("when GET /System/Info is unauthorized with an empty body then it throws", async (): Promise<void> => {
+    // Arrange
+    mockFetchNoContent(401);
+
+    // Act
+    const jellyfinClient: JellyfinClient = createJellyfinClient(
+      baseUrl,
+      apiKey,
+    );
+
+    // Assert
+    await expect(jellyfinClient.getServerVersion()).rejects.toThrow(
+      /GET \/System\/Info failed: 401/,
+    );
   });
 
   it("when POST /Packages/Installed/{name} fails then it throws an error with status", async (): Promise<void> => {

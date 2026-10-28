@@ -15,6 +15,7 @@ import type {
 } from "../types/schema/users";
 import {
   type PluginInfoSchema,
+  type PackageInfoSchema,
   type BasePluginConfigurationSchema,
 } from "../types/schema/plugins";
 
@@ -37,13 +38,22 @@ export type GetUsersResponse = ApiResponse<UserDtoSchema[]>;
 export type PostNewUserResponse = ApiResponse<UserDtoSchema>;
 export type PostUserPolicyResponse = ApiResponse<void>;
 export type PostStartupCompleteResponse = ApiResponse<void>;
+export type GetSystemInfoResponse = ApiResponse<{ Version?: string | null }>;
 export type GetPluginsResponse = ApiResponse<PluginInfoSchema[]>;
+export type GetPackagesResponse = ApiResponse<PackageInfoSchema[]>;
 export type PostInstallPackageResponse = ApiResponse<void>;
 export type GetPluginConfigurationResponse =
   ApiResponse<BasePluginConfigurationSchema>;
 export type PostPluginConfigurationResponse = ApiResponse<void>;
 
+export interface InstallPackageOptions {
+  assemblyGuid?: string;
+  version?: string;
+  repositoryUrl?: string;
+}
+
 export interface JellyfinClient {
+  getServerVersion(): Promise<string>;
   getSystemConfiguration(): Promise<ServerConfigurationSchema>;
   updateSystemConfiguration(
     body: Partial<ServerConfigurationSchema>,
@@ -75,7 +85,8 @@ export interface JellyfinClient {
   ): Promise<void>;
   completeStartupWizard(): Promise<void>;
   getPlugins(): Promise<PluginInfoSchema[]>;
-  installPackage(name: string): Promise<void>;
+  getPackages(): Promise<PackageInfoSchema[]>;
+  installPackage(name: string, options?: InstallPackageOptions): Promise<void>;
   getPluginConfiguration(
     pluginId: string,
   ): Promise<BasePluginConfigurationSchema>;
