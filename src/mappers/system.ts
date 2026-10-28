@@ -25,9 +25,15 @@ export function toTrickplayOptionsSchema(
   cfg: TrickplayOptionsConfig,
 ): TrickplayOptionsSchema {
   const out: TrickplayOptionsSchema = {};
-  out.EnableHwAcceleration = cfg.enableHwAcceleration;
-  out.EnableHwEncoding = cfg.enableHwEncoding;
-  out.ProcessThreads = cfg.processThreads;
+  if (cfg.enableHwAcceleration !== undefined) {
+    out.EnableHwAcceleration = cfg.enableHwAcceleration;
+  }
+  if (cfg.enableHwEncoding !== undefined) {
+    out.EnableHwEncoding = cfg.enableHwEncoding;
+  }
+  if (cfg.processThreads !== undefined) {
+    out.ProcessThreads = cfg.processThreads;
+  }
   return out;
 }
 
