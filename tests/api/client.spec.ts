@@ -25,8 +25,11 @@ describe("api/client", () => {
       expect(req).toBeInstanceOf(Request);
 
       const h: Headers = req.headers;
-      expect(h.get("X-Emby-Token")).toBe("XYZ");
-      expect(h.get("X-Emby-Authorization")).toContain("jellarr");
+      expect(h.get("Authorization")).toBe(
+        'MediaBrowser Token="XYZ", Client="jellarr", Device="cli", DeviceId="jellarr", Version="0.1.0"',
+      );
+      expect(h.get("X-Emby-Token")).toBeNull();
+      expect(h.get("X-Emby-Authorization")).toBeNull();
     } finally {
       spy.mockRestore();
     }

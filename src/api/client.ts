@@ -9,10 +9,9 @@ export function makeClient(baseUrl: string, apiKey: string): Client<paths> {
   client.use({
     onRequest({ request }: { request: Request }): Request {
       const headers: Headers = new Headers(request.headers);
-      headers.set("X-Emby-Token", apiKey);
       headers.set(
-        "X-Emby-Authorization",
-        'MediaBrowser Client="jellarr", Device="cli", Version="0.1.0"',
+        "Authorization",
+        `MediaBrowser Token="${apiKey}", Client="jellarr", Device="cli", DeviceId="jellarr", Version="0.1.0"`,
       );
       return new Request(request, { headers });
     },
