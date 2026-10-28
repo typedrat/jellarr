@@ -216,7 +216,13 @@ describe("calculatePluginInstalls", () => {
   it("should leave an installed plugin alone when it is in no repository", () => {
     expect(
       calculatePluginInstalls(
-        [installedPlugin("Trakt", "0f8a3c5e-0000-0000-0000-000000000000", "26.0.0")],
+        [
+          installedPlugin(
+            "Trakt",
+            "0f8a3c5e-0000-0000-0000-000000000000",
+            "26.0.0",
+          ),
+        ],
         catalog,
         [{ name: "Trakt" }],
         "12.2.0",
@@ -238,7 +244,9 @@ describe("resolveInstalledPluginNames", () => {
 
   it("should keep the desired name when the plugin is not installed", () => {
     expect(
-      resolveInstalledPluginNames([], catalog, [{ name: "SSO Authentication" }]),
+      resolveInstalledPluginNames([], catalog, [
+        { name: "SSO Authentication" },
+      ]),
     ).toEqual([{ name: "SSO Authentication" }]);
   });
 });
@@ -282,10 +290,14 @@ describe("installPlugins", () => {
       version: "5.1.1",
       repositoryUrl: "https://example.invalid/sso.json",
     });
-    expect(installPackageSpy).toHaveBeenNthCalledWith(2, "LDAP Authentication", {
-      assemblyGuid: LDAP_GUID,
-      version: "24.0.0.0",
-    });
+    expect(installPackageSpy).toHaveBeenNthCalledWith(
+      2,
+      "LDAP Authentication",
+      {
+        assemblyGuid: LDAP_GUID,
+        version: "24.0.0.0",
+      },
+    );
   });
 });
 

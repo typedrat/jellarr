@@ -32,7 +32,7 @@
       assert plugin.name != "" || throw "Plugin name cannot be empty";
         {}
         // {inherit (plugin) name;}
-        // optionalAttrs (plugin.version != null) {inherit (plugin) version;}
+        // optionalAttrs (plugin ? version && plugin.version != null) {inherit (plugin) version;}
         // optionalAttrs (plugin.configuration != null) {inherit (plugin) configuration;})
     cfg;
 in {

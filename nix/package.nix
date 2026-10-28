@@ -23,6 +23,8 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   CI = "true";
 
+  doCheck = true;
+
   installPhase = ''
     runHook preInstall
     install -Dm644 -t $out/share bundle.cjs
@@ -50,7 +52,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   pnpmDeps = fetchPnpmDeps {
     fetcherVersion = 4;
-    hash = "sha256-jo1BjRAjjfNKF0xb5cLCuELSveHeJ98iLPhMDKP1QbI=";
+    hash = "sha256-qNVnhHjTFPhJxJ8oZPBSfJs2OjNSlbmS31okZuSGWMU=";
     inherit (finalAttrs) pname src version;
   };
 

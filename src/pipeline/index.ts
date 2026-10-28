@@ -74,8 +74,7 @@ export async function runPipeline(path: string): Promise<void> {
   let currentVirtualFolders: VirtualFolderInfoSchema[] | undefined;
 
   const updatedServerConfigurationSchema:
-    | ServerConfigurationSchema
-    | undefined = calculateSystemDiff(
+    ServerConfigurationSchema | undefined = calculateSystemDiff(
     currentServerConfigurationSchema,
     cfg.system,
   );
@@ -191,13 +190,12 @@ export async function runPipeline(path: string): Promise<void> {
       await jellyfinClient.getPlugins();
     const catalog: PackageInfoSchema[] = await jellyfinClient.getPackages();
 
-    const pluginInstalls: PluginInstall[] | undefined =
-      calculatePluginInstalls(
-        installedPlugins,
-        catalog,
-        cfg.plugins,
-        await jellyfinClient.getServerVersion(),
-      );
+    const pluginInstalls: PluginInstall[] | undefined = calculatePluginInstalls(
+      installedPlugins,
+      catalog,
+      cfg.plugins,
+      await jellyfinClient.getServerVersion(),
+    );
 
     if (pluginInstalls) {
       console.log("→ installing plugins");
@@ -209,14 +207,14 @@ export async function runPipeline(path: string): Promise<void> {
     }
 
     const pluginConfigurationsToUpdate:
-      | Map<string, BasePluginConfigurationSchema>
-      | undefined = calculatePluginConfigurationsDiff(
-      await getPluginConfigurationSchemaByName(
-        jellyfinClient,
-        installedPlugins,
-      ),
-      resolveInstalledPluginNames(installedPlugins, catalog, cfg.plugins),
-    );
+      Map<string, BasePluginConfigurationSchema> | undefined =
+      calculatePluginConfigurationsDiff(
+        await getPluginConfigurationSchemaByName(
+          jellyfinClient,
+          installedPlugins,
+        ),
+        resolveInstalledPluginNames(installedPlugins, catalog, cfg.plugins),
+      );
 
     if (pluginConfigurationsToUpdate) {
       console.log("→ updating plugin configurations");

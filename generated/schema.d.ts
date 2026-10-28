@@ -6365,13 +6365,7 @@ export interface components {
        * @enum {unknown|null}
        */
       Audio?:
-        | "Mono"
-        | "Stereo"
-        | "Dolby"
-        | "DolbyDigital"
-        | "Thx"
-        | "Atmos"
-        | null;
+        "Mono" | "Stereo" | "Dolby" | "DolbyDigital" | "Thx" | "Atmos" | null;
       /** @description Gets or sets a value indicating whether this instance is movie. */
       IsMovie?: boolean | null;
       /** @description Gets or sets a value indicating whether this instance is sports. */
@@ -6936,8 +6930,7 @@ export interface components {
       DatabaseType?: string;
       /** @description Gets or sets the options required to use a custom database provider. */
       CustomProviderOptions?:
-        | components["schemas"]["CustomDatabaseOptions"]
-        | null;
+        components["schemas"]["CustomDatabaseOptions"] | null;
       /**
        * @description Gets or Sets the kind of locking behavior jellyfin should perform. Possible options are "NoLock", "Pessimistic", "Optimistic".
        *     Defaults to "NoLock".
@@ -7142,11 +7135,7 @@ export interface components {
      * @enum {string}
      */
     DownMixStereoAlgorithms:
-      | "None"
-      | "Dave750"
-      | "NightmodeDialogue"
-      | "Rfc7845"
-      | "Ac4";
+      "None" | "Dave750" | "NightmodeDialogue" | "Rfc7845" | "Ac4";
     /**
      * @description An enum that represents a day of the week, weekdays, weekends, or all days.
      * @enum {string}
@@ -7167,10 +7156,7 @@ export interface components {
      * @enum {string}
      */
     EmbeddedSubtitleOptions:
-      | "AllowAll"
-      | "AllowText"
-      | "AllowImage"
-      | "AllowNone";
+      "AllowAll" | "AllowText" | "AllowImage" | "AllowNone";
     /**
      * @description Enum containing encoder presets.
      * @enum {string}
@@ -7214,11 +7200,7 @@ export interface components {
        * @enum {unknown}
        */
       DownMixStereoAlgorithm?:
-        | "None"
-        | "Dave750"
-        | "NightmodeDialogue"
-        | "Rfc7845"
-        | "Ac4";
+        "None" | "Dave750" | "NightmodeDialogue" | "Rfc7845" | "Ac4";
       /**
        * Format: int32
        * @description Gets or sets the maximum size of the muxing queue.
@@ -7375,8 +7357,7 @@ export interface components {
       HardwareDecodingCodecs?: string[] | null;
       /** @description Gets or sets the file extensions on-demand metadata based keyframe extraction is enabled for. */
       AllowOnDemandMetadataBasedKeyframeExtractionForExtensions?:
-        | string[]
-        | null;
+        string[] | null;
     };
     EndPointInfo: {
       IsLocal?: boolean;
@@ -7468,10 +7449,7 @@ export interface components {
      * @enum {string}
      */
     FileSystemEntryType:
-      | "File"
-      | "Directory"
-      | "NetworkComputer"
-      | "NetworkShare";
+      "File" | "Directory" | "NetworkComputer" | "NetworkShare";
     /** @description Contains information about a specific folder. */
     FolderStorageDto: {
       /** @description Gets the path of the folder in question. */
@@ -8258,10 +8236,7 @@ export interface components {
     };
     /** @enum {string} */
     KeepUntil:
-      | "UntilDeleted"
-      | "UntilSpaceNeeded"
-      | "UntilWatched"
-      | "UntilDate";
+      "UntilDeleted" | "UntilSpaceNeeded" | "UntilWatched" | "UntilDate";
     /** @description Library changed message. */
     LibraryChangedMessage: {
       /** @description Class LibraryUpdateInfo. */
@@ -8338,10 +8313,7 @@ export interface components {
        * @enum {unknown}
        */
       AllowEmbeddedSubtitles?:
-        | "AllowAll"
-        | "AllowText"
-        | "AllowImage"
-        | "AllowNone";
+        "AllowAll" | "AllowText" | "AllowImage" | "AllowNone";
       TypeOptions?: components["schemas"]["TypeOptions"][];
     };
     /** @description Library options result dto. */
@@ -8664,12 +8636,7 @@ export interface components {
      * @enum {string}
      */
     MediaSegmentType:
-      | "Unknown"
-      | "Commercial"
-      | "Preview"
-      | "Recap"
-      | "Outro"
-      | "Intro";
+      "Unknown" | "Commercial" | "Preview" | "Recap" | "Outro" | "Intro";
     MediaSourceInfo: {
       /** @enum {unknown} */
       Protocol?: "File" | "Http" | "Rtmp" | "Rtsp" | "Udp" | "Rtp" | "Ftp";
@@ -8678,14 +8645,7 @@ export interface components {
       EncoderPath?: string | null;
       /** @enum {unknown|null} */
       EncoderProtocol?:
-        | "File"
-        | "Http"
-        | "Rtmp"
-        | "Rtsp"
-        | "Udp"
-        | "Rtp"
-        | "Ftp"
-        | null;
+        "File" | "Http" | "Rtmp" | "Rtsp" | "Udp" | "Rtp" | "Ftp" | null;
       /** @enum {unknown} */
       Type?: "Default" | "Grouping" | "Placeholder";
       Container?: string | null;
@@ -8945,12 +8905,7 @@ export interface components {
        * @enum {unknown}
        */
       Type?:
-        | "Audio"
-        | "Video"
-        | "Subtitle"
-        | "EmbeddedImage"
-        | "Data"
-        | "Lyric";
+        "Audio" | "Video" | "Subtitle" | "EmbeddedImage" | "Data" | "Lyric";
       /** @description Gets or sets the aspect ratio. */
       AspectRatio?: string | null;
       /**
@@ -9000,12 +8955,7 @@ export interface components {
      * @enum {string}
      */
     MediaStreamType:
-      | "Audio"
-      | "Video"
-      | "Subtitle"
-      | "EmbeddedImage"
-      | "Data"
-      | "Lyric";
+      "Audio" | "Video" | "Subtitle" | "EmbeddedImage" | "Data" | "Lyric";
     /**
      * @description Media types.
      * @enum {string}
@@ -9524,9 +9474,7 @@ export interface components {
     PlayAccess: "Full" | "None";
     /** @enum {string} */
     PlaybackErrorCode:
-      | "NotAllowed"
-      | "NoCompatibleStream"
-      | "RateLimitExceeded";
+      "NotAllowed" | "NoCompatibleStream" | "RateLimitExceeded";
     /** @description Playback info dto. */
     PlaybackInfoDto: {
       /**
@@ -9598,10 +9546,7 @@ export interface components {
        * @enum {unknown|null}
        */
       ErrorCode?:
-        | "NotAllowed"
-        | "NoCompatibleStream"
-        | "RateLimitExceeded"
-        | null;
+        "NotAllowed" | "NoCompatibleStream" | "RateLimitExceeded" | null;
     };
     /**
      * @description Enum PlaybackOrder.
@@ -9795,11 +9740,7 @@ export interface components {
      * @enum {string}
      */
     PlayCommand:
-      | "PlayNow"
-      | "PlayNext"
-      | "PlayLast"
-      | "PlayInstantMix"
-      | "PlayShuffle";
+      "PlayNow" | "PlayNext" | "PlayLast" | "PlayInstantMix" | "PlayShuffle";
     PlayerStateInfo: {
       /**
        * Format: int64
@@ -9962,11 +9903,7 @@ export interface components {
        * @enum {unknown}
        */
       PlayCommand?:
-        | "PlayNow"
-        | "PlayNext"
-        | "PlayLast"
-        | "PlayInstantMix"
-        | "PlayShuffle";
+        "PlayNow" | "PlayNext" | "PlayLast" | "PlayInstantMix" | "PlayShuffle";
       /**
        * Format: uuid
        * @description Gets or sets the controlling user identifier.
@@ -10185,12 +10122,7 @@ export interface components {
     };
     /** @enum {string} */
     ProcessPriorityClass:
-      | "Normal"
-      | "Idle"
-      | "High"
-      | "RealTime"
-      | "BelowNormal"
-      | "AboveNormal";
+      "Normal" | "Idle" | "High" | "RealTime" | "BelowNormal" | "AboveNormal";
     ProfileCondition: {
       /** @enum {unknown} */
       Condition?:
@@ -10265,12 +10197,7 @@ export interface components {
       | "NumStreams";
     /** @enum {string} */
     ProgramAudio:
-      | "Mono"
-      | "Stereo"
-      | "Dolby"
-      | "DolbyDigital"
-      | "Thx"
-      | "Atmos";
+      "Mono" | "Stereo" | "Dolby" | "DolbyDigital" | "Thx" | "Atmos";
     PublicSystemInfo: {
       /** @description Gets or sets the local address. */
       LocalAddress?: string | null;
@@ -10961,10 +10888,7 @@ export interface components {
       IsPostPaddingRequired?: boolean;
       /** @enum {unknown} */
       KeepUntil?:
-        | "UntilDeleted"
-        | "UntilSpaceNeeded"
-        | "UntilWatched"
-        | "UntilDate";
+        "UntilDeleted" | "UntilSpaceNeeded" | "UntilWatched" | "UntilDate";
       /** @description Gets or sets a value indicating whether [record any time]. */
       RecordAnyTime?: boolean;
       SkipEpisodesInLibrary?: boolean;
@@ -11500,11 +11424,7 @@ export interface components {
      * @enum {string}
      */
     SubtitlePlaybackMode:
-      | "Default"
-      | "Always"
-      | "OnlyForced"
-      | "None"
-      | "Smart";
+      "Default" | "Always" | "OnlyForced" | "None" | "Smart";
     /** @description A class for subtitle profile information. */
     SubtitleProfile: {
       /** @description Gets or sets the format. */
@@ -11733,8 +11653,7 @@ export interface components {
       WebSocketPortNumber?: number;
       /** @description Gets or sets the completed installations. */
       CompletedInstallations?:
-        | components["schemas"]["InstallationInfo"][]
-        | null;
+        components["schemas"]["InstallationInfo"][] | null;
       /**
        * @deprecated
        * @description Gets or sets a value indicating whether this instance can self restart.
@@ -11783,8 +11702,7 @@ export interface components {
       TranscodingTempPath?: string | null;
       /** @description Gets or sets the list of cast receiver applications. */
       CastReceiverApplications?:
-        | components["schemas"]["CastReceiverApplication"][]
-        | null;
+        components["schemas"]["CastReceiverApplication"][] | null;
       /**
        * @deprecated
        * @description Gets or sets a value indicating whether this instance has update available.
@@ -11895,10 +11813,7 @@ export interface components {
        * @enum {unknown}
        */
       Type?:
-        | "DailyTrigger"
-        | "WeeklyTrigger"
-        | "IntervalTrigger"
-        | "StartupTrigger";
+        "DailyTrigger" | "WeeklyTrigger" | "IntervalTrigger" | "StartupTrigger";
       /**
        * Format: int64
        * @description Gets or sets the time of day.
@@ -11933,10 +11848,7 @@ export interface components {
      * @enum {string}
      */
     TaskTriggerInfoType:
-      | "DailyTrigger"
-      | "WeeklyTrigger"
-      | "IntervalTrigger"
-      | "StartupTrigger";
+      "DailyTrigger" | "WeeklyTrigger" | "IntervalTrigger" | "StartupTrigger";
     /** @description Class ThemeMediaResult. */
     ThemeMediaResult: {
       /** @description Gets or sets the items. */
@@ -12055,10 +11967,7 @@ export interface components {
       IsPostPaddingRequired?: boolean;
       /** @enum {unknown} */
       KeepUntil?:
-        | "UntilDeleted"
-        | "UntilSpaceNeeded"
-        | "UntilWatched"
-        | "UntilDate";
+        "UntilDeleted" | "UntilSpaceNeeded" | "UntilWatched" | "UntilDate";
       /**
        * @description Gets or sets the status.
        * @enum {unknown}
@@ -12419,12 +12328,7 @@ export interface components {
        * @enum {unknown}
        */
       ProcessPriority?:
-        | "Normal"
-        | "Idle"
-        | "High"
-        | "RealTime"
-        | "BelowNormal"
-        | "AboveNormal";
+        "Normal" | "Idle" | "High" | "RealTime" | "BelowNormal" | "AboveNormal";
       /**
        * Format: int32
        * @description Gets or sets the interval, in ms, between each new trickplay image.
@@ -22383,16 +22287,10 @@ export interface operations {
       query?: {
         /** @description (Optional) Specifies the metadata refresh mode. */
         metadataRefreshMode?:
-          | "None"
-          | "ValidationOnly"
-          | "Default"
-          | "FullRefresh";
+          "None" | "ValidationOnly" | "Default" | "FullRefresh";
         /** @description (Optional) Specifies the image refresh mode. */
         imageRefreshMode?:
-          | "None"
-          | "ValidationOnly"
-          | "Default"
-          | "FullRefresh";
+          "None" | "ValidationOnly" | "Default" | "FullRefresh";
         /** @description (Optional) Determines if metadata should be replaced. Only applicable if mode is FullRefresh. */
         replaceAllMetadata?: boolean;
         /** @description (Optional) Determines if images should be replaced. Only applicable if mode is FullRefresh. */

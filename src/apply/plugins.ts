@@ -59,7 +59,10 @@ export function compareVersions(a: string, b: string): number {
  * Jellyfin only loads a plugin whose target ABI is no newer than the server,
  * so versions built for a later server are never candidates.
  */
-function isCompatible(version: VersionInfoSchema, serverVersion: string): boolean {
+function isCompatible(
+  version: VersionInfoSchema,
+  serverVersion: string,
+): boolean {
   return (
     !version.targetAbi || compareVersions(version.targetAbi, serverVersion) <= 0
   );
@@ -191,8 +194,6 @@ export function calculatePluginInstalls(
       );
       if (comparison === 0) continue;
       if (comparison < 0) {
-        // Jellyfin loads the newest installed copy of a plugin, so installing
-        // an older one alongside it would never take effect.
         if (plugin.version) {
           logger.warn(
             `Plugin "${plugin.name}" is pinned to ${plugin.version} but ${installedVersion} is installed; uninstall it to downgrade`,
@@ -229,7 +230,9 @@ export async function installPlugins(
     await client.installPackage(install.name, {
       assemblyGuid: install.guid,
       version: install.version,
-      ...(install.repositoryUrl ? { repositoryUrl: install.repositoryUrl } : {}),
+      ...(install.repositoryUrl
+        ? { repositoryUrl: install.repositoryUrl }
+        : {}),
     });
   }
 }
