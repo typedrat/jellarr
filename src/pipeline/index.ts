@@ -40,11 +40,14 @@ import {
 import {
   calculatePluginInstalls,
   installPlugins,
+  calculatePluginRemovals,
+  removePlugins,
   resolveInstalledPluginNames,
   calculatePluginConfigurationsDiff,
   applyPluginConfigurations,
   getPluginConfigurationSchemaByName,
   type PluginInstall,
+  type PluginRemoval,
 } from "../apply/plugins";
 
 export async function runPipeline(path: string): Promise<void> {
@@ -204,6 +207,21 @@ export async function runPipeline(path: string): Promise<void> {
       installedPlugins = await jellyfinClient.getPlugins();
     } else {
       console.log("✓ plugins already up to date");
+    }
+
+    const pluginRemovals: PluginRemoval[] | undefined = calculatePluginRemovals(
+      installedPlugins,
+      catalog,
+      cfg.plugins,
+    );
+
+    if (pluginRemovals) {
+      console.log("→ removing superseded plugin versions");
+      await removePlugins(jellyfinClient, pluginRemovals);
+      console.log(
+        "✓ removed superseded plugin versions; restart Jellyfin to unload them",
+      );
+      installedPlugins = await jellyfinClient.getPlugins();
     }
 
     const pluginConfigurationsToUpdate:

@@ -370,6 +370,10 @@ plugins:
   Jellyfin always loads the newest installed copy of a plugin, so a pin below
   the installed version is reported but not applied; uninstall the plugin to
   downgrade
+- Once an upgraded plugin is active, older copies of it are uninstalled.
+  Jellyfin keeps loading a superseded copy's assemblies, whose API routes then
+  clash with the new copy's, so they're removed on the next run and unloaded on
+  the following restart
 - Jellyfin loads installed or upgraded plugins only after a restart. Until then
   a newly installed plugin has no configuration to update, so its
   `configuration` is applied on the first run after the restart

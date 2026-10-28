@@ -4,7 +4,10 @@ import {
   compareVersions,
   resolveInstalledPluginNames,
   installPlugins,
+  calculatePluginRemovals,
+  removePlugins,
   type PluginInstall,
+  type PluginRemoval,
   getPluginConfigurationSchemaByName,
   calculatePluginConfigurationDiff,
   calculatePluginConfigurationsDiff,
@@ -228,6 +231,144 @@ describe("calculatePluginInstalls", () => {
         "12.2.0",
       ),
     ).toBeUndefined();
+  });
+});
+
+function withStatus(
+  plugin: PluginInfoSchema,
+  status: PluginInfoSchema["Status"],
+): PluginInfoSchema {
+  return { ...plugin, Status: status };
+}
+
+describe("calculatePluginRemovals", () => {
+  it("should remove a superseded copy once the upgrade is active", () => {
+    // Arrange: the state Jellyfin was left in after upgrading SSO 4.0.0.4.
+    const installed: PluginInfoSchema[] = [
+      installedPlugin("SSO-Auth", SSO_GUID, "5.1.1.0"),
+      withStatus(
+        installedPlugin("SSO Authentication", SSO_GUID, "5.1.1"),
+        "Restart",
+      ),
+      withStatus(
+        installedPlugin("SSO-Auth", SSO_GUID, "4.0.0.4"),
+        "Superseded",
+      ),
+    ];
+
+    // Act
+    const result: PluginRemoval[] | undefined = calculatePluginRemovals(
+      installed,
+      catalog,
+      [{ name: "SSO Authentication" }],
+    );
+
+    // Assert
+    expect(result).toEqual([
+      {
+        name: "SSO Authentication",
+        id: SSO_GUID.replace(/-/g, ""),
+        version: "4.0.0.4",
+      },
+    ]);
+  });
+
+  it("should accept Jellyfin's misspelled superseded status", () => {
+    expect(
+      calculatePluginRemovals(
+        [
+          installedPlugin("SSO-Auth", SSO_GUID, "5.1.1.0"),
+          withStatus(
+            installedPlugin("SSO-Auth", SSO_GUID, "4.0.0.4"),
+            "Superceded",
+          ),
+        ],
+        catalog,
+        [{ name: "SSO Authentication" }],
+      )?.map((removal: PluginRemoval) => removal.version),
+    ).toEqual(["4.0.0.4"]);
+  });
+
+  it("should keep the running copy while an upgrade waits for a restart", () => {
+    expect(
+      calculatePluginRemovals(
+        [
+          installedPlugin("SSO-Auth", SSO_GUID, "4.0.0.4"),
+          withStatus(
+            installedPlugin("SSO Authentication", SSO_GUID, "5.1.1"),
+            "Restart",
+          ),
+        ],
+        catalog,
+        [{ name: "SSO Authentication" }],
+      ),
+    ).toBeUndefined();
+  });
+
+  it("should not remove a copy sharing the active version", () => {
+    expect(
+      calculatePluginRemovals(
+        [
+          installedPlugin("SSO-Auth", SSO_GUID, "5.1.1.0"),
+          withStatus(
+            installedPlugin("SSO-Auth", SSO_GUID, "5.1.1"),
+            "Superseded",
+          ),
+        ],
+        catalog,
+        [{ name: "SSO Authentication" }],
+      ),
+    ).toBeUndefined();
+  });
+
+  it("should leave plugins that are not managed alone", () => {
+    expect(
+      calculatePluginRemovals(
+        [
+          installedPlugin("SSO-Auth", SSO_GUID, "5.1.1.0"),
+          withStatus(
+            installedPlugin("SSO-Auth", SSO_GUID, "4.0.0.4"),
+            "Superseded",
+          ),
+        ],
+        catalog,
+        [{ name: "LDAP Authentication" }],
+      ),
+    ).toBeUndefined();
+  });
+
+  it("should skip copies already marked for deletion", () => {
+    expect(
+      calculatePluginRemovals(
+        [
+          installedPlugin("SSO-Auth", SSO_GUID, "5.1.1.0"),
+          withStatus(
+            installedPlugin("SSO-Auth", SSO_GUID, "4.0.0.4"),
+            "Deleted",
+          ),
+        ],
+        catalog,
+        [{ name: "SSO Authentication" }],
+      ),
+    ).toBeUndefined();
+  });
+});
+
+describe("removePlugins", () => {
+  it("should uninstall each removal by ID and version", async () => {
+    // Arrange
+    const uninstallPluginSpy: Mock = vi.fn().mockResolvedValue(undefined);
+    const mockClient: JellyfinClient = {
+      uninstallPlugin: uninstallPluginSpy,
+    } as unknown as JellyfinClient;
+
+    // Act
+    await removePlugins(mockClient, [
+      { name: "SSO Authentication", id: "abc", version: "4.0.0.4" },
+    ]);
+
+    // Assert
+    expect(uninstallPluginSpy).toHaveBeenCalledWith("abc", "4.0.0.4");
   });
 });
 

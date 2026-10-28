@@ -30,6 +30,7 @@ import type {
   GetPluginsResponse,
   GetPackagesResponse,
   PostInstallPackageResponse,
+  DeletePluginResponse,
   InstallPackageOptions,
   GetPluginConfigurationResponse,
   PostPluginConfigurationResponse,
@@ -331,6 +332,20 @@ export function createJellyfinClient(
       if (!res.response.ok) {
         throw new Error(
           `POST /Packages/Installed/${name} failed: ${res.response.status.toString()}`,
+        );
+      }
+    },
+
+    async uninstallPlugin(pluginId: string, version: string): Promise<void> {
+      const res: DeletePluginResponse = await client.DELETE(
+        "/Plugins/{pluginId}/{version}",
+        {
+          params: { path: { pluginId, version } },
+        },
+      );
+      if (!res.response.ok) {
+        throw new Error(
+          `DELETE /Plugins/${pluginId}/${version} failed: ${res.response.status.toString()}`,
         );
       }
     },

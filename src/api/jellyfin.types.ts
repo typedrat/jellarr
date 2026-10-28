@@ -42,6 +42,7 @@ export type GetSystemInfoResponse = ApiResponse<{ Version?: string | null }>;
 export type GetPluginsResponse = ApiResponse<PluginInfoSchema[]>;
 export type GetPackagesResponse = ApiResponse<PackageInfoSchema[]>;
 export type PostInstallPackageResponse = ApiResponse<void>;
+export type DeletePluginResponse = ApiResponse<void>;
 export type GetPluginConfigurationResponse =
   ApiResponse<BasePluginConfigurationSchema>;
 export type PostPluginConfigurationResponse = ApiResponse<void>;
@@ -87,6 +88,7 @@ export interface JellyfinClient {
   getPlugins(): Promise<PluginInfoSchema[]>;
   getPackages(): Promise<PackageInfoSchema[]>;
   installPackage(name: string, options?: InstallPackageOptions): Promise<void>;
+  uninstallPlugin(pluginId: string, version: string): Promise<void>;
   getPluginConfiguration(
     pluginId: string,
   ): Promise<BasePluginConfigurationSchema>;

@@ -237,6 +237,75 @@ export async function installPlugins(
   }
 }
 
+export interface PluginRemoval {
+  name: string;
+  id: string;
+  version: string;
+}
+
+/**
+ * Finds old copies of desired plugins left behind by an upgrade. Jellyfin
+ * marks them superseded but still loads their assemblies, so an old copy's
+ * API controllers clash with the new one's. Copies are only removed once a
+ * newer copy is active, so a pending upgrade never loses the running version.
+ */
+export function calculatePluginRemovals(
+  installed: PluginInfoSchema[],
+  catalog: PackageInfoSchema[],
+  desired: PluginConfigList,
+): PluginRemoval[] | undefined {
+  const removals: PluginRemoval[] = [];
+
+  for (const plugin of desired) {
+    const copies: PluginInfoSchema[] = findInstalled(
+      installed,
+      findPackage(catalog, plugin),
+      plugin,
+    );
+    const newestActive: string | undefined = newestVersion(
+      copies.filter((copy: PluginInfoSchema) => copy.Status === "Active"),
+    );
+    if (!newestActive) continue;
+
+    for (const copy of copies) {
+      if (!copy.Id || !copy.Version) continue;
+      if (compareVersions(copy.Version, newestActive) === 0) continue;
+      const superseded: boolean =
+        copy.Status === "Superseded" || copy.Status === "Superceded";
+      const older: boolean =
+        copy.Status !== "Deleted" &&
+        compareVersions(copy.Version, newestActive) < 0;
+      if (!superseded && !older) continue;
+      if (
+        removals.some(
+          (removal: PluginRemoval) =>
+            removal.id === copy.Id && removal.version === copy.Version,
+        )
+      ) {
+        continue;
+      }
+
+      logger.info(
+        `Removing plugin ${plugin.name} ${copy.Version}, superseded by ${newestActive}`,
+      );
+      removals.push({ name: plugin.name, id: copy.Id, version: copy.Version });
+    }
+  }
+
+  return removals.length > 0 ? removals : undefined;
+}
+
+export async function removePlugins(
+  client: JellyfinClient,
+  removals: PluginRemoval[] | undefined,
+): Promise<void> {
+  if (!removals) return;
+
+  for (const removal of removals) {
+    await client.uninstallPlugin(removal.id, removal.version);
+  }
+}
+
 /**
  * Renames desired plugins to the names Jellyfin reports for their installed
  * copies, so their configuration can be matched against installed plugins.

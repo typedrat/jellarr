@@ -896,6 +896,23 @@ describe("api/jf Plugins façade", () => {
     );
   });
 
+  it("when DELETE /Plugins/{pluginId}/{version} succeeds then it resolves", async (): Promise<void> => {
+    // Arrange
+    mockFetchNoContent(204);
+
+    // Act
+    const jellyfinClient: JellyfinClient = createJellyfinClient(
+      baseUrl,
+      apiKey,
+    );
+    await jellyfinClient.uninstallPlugin("abc", "4.0.0.4");
+
+    // Assert
+    const req: Request = getLastRequest();
+    expect(req.method).toBe("DELETE");
+    expect(req.url).toMatch(/\/Plugins\/abc\/4\.0\.0\.4$/);
+  });
+
   it("when GET /Packages returns JSON then it returns the catalog", async (): Promise<void> => {
     // Arrange
     mockFetchJson([{ name: "Trakt", guid: "abc", versions: [] }]);
