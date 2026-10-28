@@ -1,9 +1,14 @@
 {
   lib,
-  pkgs,
+  makeBinaryWrapper,
+  nodejs_24,
+  pnpm,
+  pnpmConfigHook ? pnpm.configHook,
+  fetchPnpmDeps ? pnpm.fetchDeps,
+  stdenvNoCC,
   ...
 }:
-pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
+stdenvNoCC.mkDerivation (finalAttrs: {
   buildPhase = ''
     runHook preBuild
     pnpm build
@@ -21,7 +26,7 @@ pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
   installPhase = ''
     runHook preInstall
     install -Dm644 -t $out/share bundle.cjs
-    makeWrapper ${lib.getExe pkgs.nodejs_24} $out/bin/jellarr \
+    makeWrapper ${lib.getExe nodejs_24} $out/bin/jellarr \
       --add-flags "$out/share/bundle.cjs"
     runHook postInstall
   '';
@@ -35,15 +40,15 @@ pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
   };
 
   nativeBuildInputs = [
-    pkgs.makeBinaryWrapper
-    pkgs.nodejs_24
-    pkgs.pnpm
-    pkgs.pnpmConfigHook
+    makeBinaryWrapper
+    nodejs_24
+    pnpm
+    pnpmConfigHook
   ];
 
   pname = "jellarr";
 
-  pnpmDeps = pkgs.fetchPnpmDeps {
+  pnpmDeps = fetchPnpmDeps {
     fetcherVersion = 4;
     hash = "sha256-jo1BjRAjjfNKF0xb5cLCuELSveHeJ98iLPhMDKP1QbI=";
     inherit (finalAttrs) pname src version;

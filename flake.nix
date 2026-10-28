@@ -44,10 +44,7 @@
         formatter = treefmtFormatEval.config.build.wrapper;
 
         packages = let
-          package = import ./nix/package.nix {
-            inherit pkgs;
-            inherit (pkgs) lib;
-          };
+          package = pkgs.callPackage ./nix/package.nix {};
         in {
           default = package;
 
