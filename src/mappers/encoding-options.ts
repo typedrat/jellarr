@@ -52,5 +52,25 @@ export function mapEncodingOptionsConfigToSchema(
     out.AllowAv1Encoding = desired.allowAv1Encoding;
   }
 
+  if (typeof desired.enableTonemapping !== "undefined") {
+    out.EnableTonemapping = desired.enableTonemapping;
+  }
+
+  if (typeof desired.enableVppTonemapping !== "undefined") {
+    out.EnableVppTonemapping = desired.enableVppTonemapping;
+  }
+
+  if (typeof desired.tonemappingAlgorithm !== "undefined") {
+    out.TonemappingAlgorithm = desired.tonemappingAlgorithm;
+  }
+
+  if (typeof desired.tonemappingMode !== "undefined") {
+    out.TonemappingMode = desired.tonemappingMode;
+  }
+
+  if (typeof desired.tonemappingRange !== "undefined") {
+    out.TonemappingRange = desired.tonemappingRange;
+  }
+
   return out;
 }
