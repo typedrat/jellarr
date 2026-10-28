@@ -45,7 +45,7 @@ def wait_for_bootstrap(server):
     for i in range(30):
         try:
             server.succeed(
-                "curl -sf 'http://localhost:8096/System/Configuration' -H 'X-Emby-Token: test-api-key'"
+                "curl -sf 'http://localhost:8096/System/Configuration' -H 'Authorization: MediaBrowser Token=\"test-api-key\"'"
             )
             print("✓ Jellyfin authenticated API ready")
             break
@@ -57,7 +57,7 @@ def wait_for_bootstrap(server):
 
 def jellyfin_api_call(server, endpoint, method="GET", data=None):
     url = f"http://localhost:8096{endpoint}"
-    cmd = f"curl -sf '{url}' -H 'X-Emby-Token: test-api-key'"
+    cmd = f"curl -sf '{url}' -H 'Authorization: MediaBrowser Token=\"test-api-key\"'"
 
     if method == "POST":
         cmd += " -H 'Content-Type: application/json'"
