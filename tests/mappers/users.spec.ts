@@ -445,6 +445,7 @@ describe("mappers/users", () => {
         password: "pass",
         displayMissingEpisodes: true,
         subtitleLanguagePreference: "eng",
+        subtitleMode: "Smart",
       };
 
       const result: Partial<UserConfigurationSchema> =
@@ -453,6 +454,7 @@ describe("mappers/users", () => {
       expect(result).toEqual({
         DisplayMissingEpisodes: true,
         SubtitleLanguagePreference: "eng",
+        SubtitleMode: "Smart",
       });
     });
 

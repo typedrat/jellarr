@@ -637,3 +637,83 @@ describe("UserConfigList with policies", () => {
     expect(result.success).toBe(false);
   });
 });
+
+describe("UserConfig subtitle preferences", () => {
+  type SubtitleMode = "Default" | "Always" | "OnlyForced" | "None" | "Smart";
+
+  it("should validate user with subtitle preferences", () => {
+    // Arrange
+    const config: z.input<typeof UserConfigType> = {
+      name: "user",
+      password: "password",
+      subtitleLanguagePreference: "heb",
+      subtitleMode: "Always",
+    };
+
+    // Act
+    const result: ZodSafeParseResult<UserConfig> =
+      UserConfigType.safeParse(config);
+
+    // Assert
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.subtitleLanguagePreference).toBe("heb");
+      expect(result.data.subtitleMode).toBe("Always");
+    }
+  });
+
+  it("should validate each subtitle mode", () => {
+    // Arrange
+    const subtitleModes: SubtitleMode[] = [
+      "Default",
+      "Always",
+      "OnlyForced",
+      "None",
+      "Smart",
+    ];
+
+    subtitleModes.forEach((subtitleMode: SubtitleMode) => {
+      // Act
+      const result: ZodSafeParseResult<UserConfig> = UserConfigType.safeParse({
+        name: "user",
+        password: "password",
+        subtitleMode,
+      });
+
+      // Assert
+      expect(result.success).toBe(true);
+    });
+  });
+
+  it("should reject an unknown subtitle mode", () => {
+    // Arrange
+    const config: z.input<typeof UserConfigType> = {
+      name: "user",
+      password: "password",
+      subtitleMode: "Sometimes" as "Always",
+    };
+
+    // Act
+    const result: ZodSafeParseResult<UserConfig> =
+      UserConfigType.safeParse(config);
+
+    // Assert
+    expect(result.success).toBe(false);
+  });
+
+  it("should reject an empty subtitle language preference", () => {
+    // Arrange
+    const config: z.input<typeof UserConfigType> = {
+      name: "user",
+      password: "password",
+      subtitleLanguagePreference: "",
+    };
+
+    // Act
+    const result: ZodSafeParseResult<UserConfig> =
+      UserConfigType.safeParse(config);
+
+    // Assert
+    expect(result.success).toBe(false);
+  });
+});

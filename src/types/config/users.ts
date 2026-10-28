@@ -27,6 +27,15 @@ export const UserConfigType: z.ZodObject<{
   policy: z.ZodOptional<typeof UserPolicyConfigType>;
   displayMissingEpisodes: z.ZodOptional<z.ZodBoolean>;
   subtitleLanguagePreference: z.ZodOptional<z.ZodString>;
+  subtitleMode: z.ZodOptional<
+    z.ZodEnum<{
+      Default: "Default";
+      Always: "Always";
+      OnlyForced: "OnlyForced";
+      None: "None";
+      Smart: "Smart";
+    }>
+  >;
   maxActiveSessions: z.ZodOptional<z.ZodNumber>;
 }> = z
   .object({
@@ -36,6 +45,9 @@ export const UserConfigType: z.ZodObject<{
     policy: UserPolicyConfigType.optional(),
     displayMissingEpisodes: z.boolean().optional(),
     subtitleLanguagePreference: z.string().min(1).optional(),
+    subtitleMode: z
+      .enum(["Default", "Always", "OnlyForced", "None", "Smart"])
+      .optional(),
     maxActiveSessions: z.number().int().min(1).optional(),
   })
   .strict()

@@ -196,6 +196,7 @@ export async function runDump(baseUrl: string): Promise<void> {
       displayMissingEpisodes: user.Configuration?.DisplayMissingEpisodes,
       subtitleLanguagePreference:
         user.Configuration?.SubtitleLanguagePreference,
+      subtitleMode: user.Configuration?.SubtitleMode,
     })),
 
     plugins: pluginsWithConfig,
