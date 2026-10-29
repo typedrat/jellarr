@@ -12,6 +12,7 @@ import type {
 import {
   mapVirtualFolderConfigToSchema,
   mapVirtualFolderInfoSchemaToAddVirtualFolderDtoSchema,
+  withIgnoredLibraryOptions,
 } from "../mappers/library";
 import { applyChangeset, diff, Operation, type IChange } from "json-diff-ts";
 
@@ -84,10 +85,6 @@ export function calculateLibraryDiff(
     return undefined;
   }
 
-  const next: VirtualFolderInfoSchema[] = desired.map(
-    mapVirtualFolderConfigToSchema,
-  );
-
   const currentByName: Map<string, VirtualFolderInfoSchema> = new Map(
     current
       .map((folder: VirtualFolderInfoSchema) =>
@@ -101,6 +98,24 @@ export function calculateLibraryDiff(
             | [string, VirtualFolderInfoSchema | undefined],
         ): entry is [string, VirtualFolderInfoSchema] => Array.isArray(entry),
       ),
+  );
+
+  const next: VirtualFolderInfoSchema[] = desired.map(
+    (folder: VirtualFolderConfig): VirtualFolderInfoSchema => {
+      const mapped: Partial<VirtualFolderInfoSchema> =
+        mapVirtualFolderConfigToSchema(folder);
+      const currentFolder: VirtualFolderInfoSchema | undefined =
+        currentByName.get(folder.name);
+      return (
+        currentFolder
+          ? withIgnoredLibraryOptions(
+              mapped,
+              currentFolder,
+              folder.ignoreChanges ?? [],
+            )
+          : mapped
+      ) as VirtualFolderInfoSchema;
+    },
   );
 
   for (const folder of next) {

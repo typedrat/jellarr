@@ -237,6 +237,23 @@ library:
                   - path: "/data/tv"
 ```
 
+`ignoreChanges` lists library options that are only applied when the library
+is created; after that, Jellarr leaves them as the server has them. This suits
+options something else manages, such as the paths a plugin like Shokofin
+rewrites to point at its virtual file system:
+
+```yaml
+library:
+    virtualFolders:
+        - name: "Anime"
+          collectionType: "tvshows"
+          libraryOptions:
+              pathInfos:
+                  - path: "/data/anime"
+          ignoreChanges:
+              - pathInfos
+```
+
 ### Branding Configuration
 
 ```yaml

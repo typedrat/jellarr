@@ -336,6 +336,114 @@ describe("apply/library", () => {
       expect(result?.toCreate).toBeUndefined();
     });
 
+    it("should leave ignored options alone on an existing folder", () => {
+      const currentVirtualFolders: VirtualFolderInfoSchema[] = [
+        {
+          ItemId: "anime-id",
+          Name: "Anime",
+          CollectionType: "tvshows",
+          LibraryOptions: {
+            PathInfos: [{ Path: "/var/lib/jellyfin/Shokofin/VFS/anime-id" }],
+          } as LibraryOptionsSchema,
+        },
+      ];
+
+      const desired: LibraryConfig = {
+        virtualFolders: [
+          {
+            name: "Anime",
+            collectionType: "tvshows",
+            libraryOptions: {
+              pathInfos: [{ path: "/data/anime" }],
+            },
+            ignoreChanges: ["pathInfos"],
+          },
+        ],
+      };
+
+      const result = calculateLibraryDiff(
+        currentVirtualFolders,
+        desired.virtualFolders as VirtualFolderConfig[],
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it("should keep the server's value for ignored options when another option changes", () => {
+      const currentVirtualFolders: VirtualFolderInfoSchema[] = [
+        {
+          ItemId: "anime-id",
+          Name: "Anime",
+          CollectionType: "tvshows",
+          LibraryOptions: {
+            PathInfos: [{ Path: "/var/lib/jellyfin/Shokofin/VFS/anime-id" }],
+          } as LibraryOptionsSchema,
+        },
+      ];
+
+      const desired: LibraryConfig = {
+        virtualFolders: [
+          {
+            name: "Anime",
+            collectionType: "tvshows",
+            libraryOptions: {
+              pathInfos: [{ path: "/data/anime" }],
+              enableRealtimeMonitor: false,
+            },
+            ignoreChanges: ["pathInfos"],
+          },
+        ],
+      };
+
+      const result = calculateLibraryDiff(
+        currentVirtualFolders,
+        desired.virtualFolders as VirtualFolderConfig[],
+      );
+
+      expect(result?.toUpdate).toEqual([
+        {
+          id: "anime-id",
+          name: "Anime",
+          libraryOptions: {
+            PathInfos: [{ Path: "/var/lib/jellyfin/Shokofin/VFS/anime-id" }],
+            EnableRealtimeMonitor: false,
+          },
+        },
+      ]);
+      expect(result?.toCreate).toBeUndefined();
+    });
+
+    it("should apply ignored options when creating a folder", () => {
+      const desired: LibraryConfig = {
+        virtualFolders: [
+          {
+            name: "Anime",
+            collectionType: "tvshows",
+            libraryOptions: {
+              pathInfos: [{ path: "/data/anime" }],
+            },
+            ignoreChanges: ["pathInfos"],
+          },
+        ],
+      };
+
+      const result = calculateLibraryDiff(
+        [],
+        desired.virtualFolders as VirtualFolderConfig[],
+      );
+
+      expect(result?.toCreate).toEqual([
+        {
+          Name: "Anime",
+          CollectionType: "tvshows",
+          LibraryOptions: {
+            PathInfos: [{ Path: "/data/anime" }],
+          },
+        },
+      ]);
+      expect(result?.toUpdate).toBeUndefined();
+    });
+
     it("should update existing folder whose name contains an apostrophe", () => {
       const currentVirtualFolders: VirtualFolderInfoSchema[] = [
         {

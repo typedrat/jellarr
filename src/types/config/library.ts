@@ -1,5 +1,39 @@
 import { z } from "zod";
 
+export const LIBRARY_OPTION_NAMES: readonly [
+  "pathInfos",
+  "typeOptions",
+  "automaticallyAddToCollection",
+  "enableChapterImageExtraction",
+  "extractChapterImagesDuringLibraryScan",
+  "extractTrickplayImagesDuringLibraryScan",
+  "enableEmbeddedEpisodeInfos",
+  "enableEmbeddedExtraTitles",
+  "enableTrickplayImageExtraction",
+  "saveTrickplayWithMedia",
+  "metadataSavers",
+  "saveLocalMetadata",
+  "automaticRefreshIntervalDays",
+  "enableRealtimeMonitor",
+] = [
+  "pathInfos",
+  "typeOptions",
+  "automaticallyAddToCollection",
+  "enableChapterImageExtraction",
+  "extractChapterImagesDuringLibraryScan",
+  "extractTrickplayImagesDuringLibraryScan",
+  "enableEmbeddedEpisodeInfos",
+  "enableEmbeddedExtraTitles",
+  "enableTrickplayImageExtraction",
+  "saveTrickplayWithMedia",
+  "metadataSavers",
+  "saveLocalMetadata",
+  "automaticRefreshIntervalDays",
+  "enableRealtimeMonitor",
+] as const;
+
+export type LibraryOptionName = (typeof LIBRARY_OPTION_NAMES)[number];
+
 export const VirtualFolderConfigType: z.ZodObject<{
   name: z.ZodString;
   collectionType: z.ZodEnum<{
@@ -42,6 +76,9 @@ export const VirtualFolderConfigType: z.ZodObject<{
     automaticRefreshIntervalDays: z.ZodOptional<z.ZodNumber>;
     enableRealtimeMonitor: z.ZodOptional<z.ZodBoolean>;
   }>;
+  ignoreChanges: z.ZodOptional<
+    z.ZodArray<z.ZodEnum<{ [K in LibraryOptionName]: K }>>
+  >;
 }> = z
   .object({
     name: z.string().min(1),
@@ -93,6 +130,9 @@ export const VirtualFolderConfigType: z.ZodObject<{
         enableRealtimeMonitor: z.boolean().optional(),
       })
       .strict(),
+    // Library options left as the server has them once the library exists;
+    // they are only applied when the library is created.
+    ignoreChanges: z.array(z.enum(LIBRARY_OPTION_NAMES)).optional(),
   })
   .strict();
 
